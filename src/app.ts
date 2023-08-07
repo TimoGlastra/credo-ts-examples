@@ -1,20 +1,23 @@
 import console from 'console'
 import { issuer } from './issuer'
-import { holder } from './holder'
 import {
-  DidDocument,
   DidDocumentBuilder,
-  JsonTransformer,
+  HandshakeProtocol,
   KeyType,
   OutOfBandState,
   TypedArrayEncoder,
   getEd25519VerificationKey2018,
 } from '@aries-framework/core'
+import { connect } from 'ngrok'
+import * as QRCode from 'qrcode'
+import { server } from './server'
 
 async function app() {
   await issuer.initialize()
-  await holder.initialize()
   issuer.config.logger.info('Agents initialized!')
+
+  const ngrokUrl = await connect(6006)
+  issuer.config.endpoints = [ngrokUrl + '/didcomm']
 
   const domain = 'sairanjitaw.github.io'
   const did = `did:web:${domain}`
@@ -53,24 +56,26 @@ async function app() {
   const dids = await issuer.dids.getCreatedDids({ did })
   console.log('dids', JSON.stringify(dids))
 
+  // Setting up shorten url
+
+  // server.get('/url/:invitationId', async (req, res) => {
+  //   const outOfBandRecord = await issuer.oob.findByCreatedInvitationId(req.params.invitationId)
+
+  //   if (!outOfBandRecord || outOfBandRecord.state !== OutOfBandState.AwaitResponse)
+  //     return res.status(404).send('Not found')
+
+  //   const invitationJson = outOfBandRecord.outOfBandInvitation.toJSON({ useDidSovPrefixWhereAllowed: true })
+
+  //   return res.header('content-type', 'application/json').send(invitationJson)
+  // })
+
   // Create out of band invitation
-
-  const inv = await holder.oob.createLegacyInvitation({
-    autoAcceptConnection: true,
-  })
-  const { connectionRecord } = await issuer.oob.receiveInvitation(inv.invitation)
-  if (!connectionRecord) {
-    throw new Error('Connection not found')
-  }
-
-  await issuer.connections.returnWhenIsConnected(connectionRecord.id)
 
   const usingDid = dids.find((record) => record.did.includes('did:web'))?.did
 
   console.log('\n\n\nusingDid***', usingDid)
 
-  const credRecord = await issuer.credentials.offerCredential({
-    connectionId: connectionRecord.id,
+  const { message } = await issuer.credentials.createOffer({
     credentialFormats: {
       jsonld: {
         credential: {
@@ -93,6 +98,21 @@ async function app() {
     },
     protocolVersion: 'v2',
   })
+
+  const { outOfBandInvitation } = await issuer.oob.createInvitation({
+    autoAcceptConnection: true,
+    messages: [message],
+    handshakeProtocols: [HandshakeProtocol.Connections],
+    handshake: true,
+    label: 'JSON ld Issuer',
+  })
+
+  // Create short url for invitation
+  const shortUrl = `${ngrokUrl}/url/${outOfBandInvitation.id}`
+  const qrInvitation = await QRCode.toString(shortUrl, { type: 'terminal' })
+
+  console.log(qrInvitation)
+  console.log(shortUrl)
 }
 
 app()

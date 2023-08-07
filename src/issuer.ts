@@ -52,7 +52,6 @@ export const issuer = new Agent({
       id: 'issuer-agent',
       key: 'issuer-agent-key',
     },
-    endpoints: ['http://localhost:6006/didcomm'],
     // Change to view logs in terminal
     logger: new ConsoleLogger(LogLevel.debug),
   },
