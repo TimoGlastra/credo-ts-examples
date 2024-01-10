@@ -39,6 +39,7 @@ import {
 import { indyVdr } from '@hyperledger/indy-vdr-nodejs'
 import { anoncreds } from '@hyperledger/anoncreds-nodejs'
 import { ariesAskar } from '@hyperledger/aries-askar-nodejs'
+import { BbsModule } from '@aries-framework/bbs-signatures'
 
 // provides legacy (non-ledger-agnostic) indy anoncreds for
 // v1/v2 proof/credential protocol
@@ -49,7 +50,7 @@ export const holder = new Agent({
   config: {
     label: 'Holder Agent',
     walletConfig: {
-      id: 'holder-agent',
+      id: 'holder-agent-new',
       key: 'holder-agent-key',
     },
     // Change to view logs in terminal
@@ -57,6 +58,9 @@ export const holder = new Agent({
     endpoints: ['http://localhost:6007/didcomm'],
   },
   modules: {
+    //BBS
+    bbs: new BbsModule(),
+
     // Storage
     askar: new AskarModule({
       ariesAskar,

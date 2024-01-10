@@ -9,33 +9,67 @@ import {
   OutOfBandState,
   TypedArrayEncoder,
   getEd25519VerificationKey2018,
+  SECURITY_CONTEXT_BBS_URL,
+  CREDENTIALS_CONTEXT_V1_URL,
 } from '@aries-framework/core'
+import { Bls12381g2SigningProvider, Bls12381G2KeyPair } from '@aries-framework/bbs-signatures'
 
 async function app() {
   await issuer.initialize()
   await holder.initialize()
   issuer.config.logger.info('Agents initialized!')
 
-  const domain = 'sairanjit.github.io'
-  const did = `did:web:${domain}`
-  const keyId = `${did}#key-1`
-
-  const key = await issuer.wallet.createKey({
-    keyType: KeyType.Ed25519,
-    privateKey: TypedArrayEncoder.fromString('afjdemoverysercure00000000000000'),
+  const keyPair = await Bls12381G2KeyPair.generate({
+    seed: TypedArrayEncoder.fromString('afjdemoverysercure00000000000000'),
   })
 
-  const didDocument = new DidDocumentBuilder(did)
-    .addContext('https://w3id.org/security/suites/ed25519-2018/v1')
-    .addVerificationMethod(getEd25519VerificationKey2018({ key, id: keyId, controller: did }))
-    .addAuthentication(keyId)
-    .build()
+  console.log('keyPair', keyPair)
 
-  await issuer.dids.import({
-    did,
-    overwrite: true,
-    didDocument,
+  // issuer.dependencyManager.in
+
+  // const domain = 'sairanjit.github.io'
+  // const did = `did:web:${domain}`
+  // const keyId = `${did}#key-1`
+
+  // const did =
+  //   'did:key:zUC7GGzAkrEYjngGiv1xSHaQcssHppqKcQD8ktLSUjk8C22WSemP4MqWR6GGynqih6DCCQ8zafn1u2pEUHo24JJs2UwxoLuHB8M1gGyBPhAyjH3a7mx8kP5wRQXLLMPGGgFP8tS'
+
+  // const key = await issuer.wallet.createKey({
+  //   keyType: KeyType.Bls12381g2,
+  //   // privateKey: TypedArrayEncoder.fromString('afjdemoverysercure00000000000000'),
+  //   seed: TypedArrayEncoder.fromString('afjdemoverysercure00000000000000'),
+  // })
+
+  // console.log('first key publicKeyBase58', key.publicKeyBase58)
+
+  // const didDocument = new DidDocumentBuilder(did)
+  //   .addContext('https://w3id.org/security/suites/ed25519-2018/v1')
+  //   .addVerificationMethod(getEd25519VerificationKey2018({ key, id: keyId, controller: did }))
+  //   .addAuthentication(keyId)
+  //   .build()
+
+  // await issuer.dids.import({
+  //   did,
+  //   overwrite: true,
+  //   privateKeys: [
+  //     {
+  //       keyType: KeyType.Bls12381g2,
+  //       privateKey: TypedArrayEncoder.fromString('afjdemoverysercure00000000000000'),
+  //     },
+  //   ],
+  //   // didDocument,
+  // })
+
+  // BBS
+  const newdid = await issuer.dids.create({
+    method: 'key',
+    options: {
+      keyType: KeyType.Bls12381g2,
+      privateKey: TypedArrayEncoder.fromString('afjdemoverysercure00000000000000'),
+    },
   })
+  console.log('did create result', newdid)
+  // BBS
 
   // const issuerId = `did:web:sairanjitaw.github.io`
   // const privateKey = '73f80dcde8be30e538ea8bafeb4701d098c5ea72720a51dc750527f4b78f01b2'
@@ -50,8 +84,8 @@ async function app() {
   //   ],
   // })
 
-  const dids = await issuer.dids.getCreatedDids({ did })
-  console.log('dids', JSON.stringify(dids))
+  // const dids = await issuer.dids.getCreatedDids({ method: 'key' })
+  // console.log('dids', JSON.stringify(dids))
 
   // Create out of band invitation
 
@@ -65,18 +99,22 @@ async function app() {
 
   await issuer.connections.returnWhenIsConnected(connectionRecord.id)
 
-  const usingDid = dids.find((record) => record.did.includes('did:web'))?.did
+  // const usingDid = dids.find((record) => record.did.includes('did:key'))?.did
 
-  console.log('\n\n\nusingDid***', usingDid)
+  // console.log('\n\n\nusingDid***', usingDid)
 
   const credRecord = await issuer.credentials.offerCredential({
     connectionId: connectionRecord.id,
     credentialFormats: {
       jsonld: {
         credential: {
-          '@context': ['https://www.w3.org/2018/credentials/v1', 'https://www.w3.org/2018/credentials/examples/v1'],
+          '@context': [
+            CREDENTIALS_CONTEXT_V1_URL,
+            'https://www.w3.org/2018/credentials/examples/v1',
+            SECURITY_CONTEXT_BBS_URL,
+          ],
           type: ['VerifiableCredential', 'UniversityDegreeCredential'],
-          issuer: { id: usingDid! },
+          issuer: newdid.didState.did!,
           issuanceDate: new Date().toISOString(),
           credentialSubject: {
             degree: {
@@ -86,7 +124,7 @@ async function app() {
           },
         },
         options: {
-          proofType: 'Ed25519Signature2018',
+          proofType: 'BbsBlsSignature2020',
           proofPurpose: 'assertionMethod',
         },
       },

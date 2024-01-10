@@ -22,10 +22,14 @@ import {
   JsonLdCredentialFormatService,
   KeyDidRegistrar,
   KeyDidResolver,
+  KeyType,
   LogLevel,
   ProofsModule,
+  SignatureSuiteRegistry,
+  SigningProviderRegistry,
   V2CredentialProtocol,
   V2ProofProtocol,
+  VERIFICATION_METHOD_TYPE_BLS12381G2_KEY_2020,
   W3cCredentialsModule,
   WebDidResolver,
 } from '@aries-framework/core'
@@ -39,17 +43,39 @@ import {
 import { indyVdr } from '@hyperledger/indy-vdr-nodejs'
 import { anoncreds } from '@hyperledger/anoncreds-nodejs'
 import { ariesAskar } from '@hyperledger/aries-askar-nodejs'
+import {
+  BbsBlsSignature2020,
+  BbsBlsSignatureProof2020,
+  BbsModule,
+  Bls12381g2SigningProvider,
+} from '@aries-framework/bbs-signatures'
+import { AskarWallet } from '@aries-framework/askar'
 
 // provides legacy (non-ledger-agnostic) indy anoncreds for
 // v1/v2 proof/credential protocol
 const indyProofFormat = new LegacyIndyProofFormatService()
 const indyCredentialFormat = new LegacyIndyCredentialFormatService()
 
+const signatureSuiteRegistry = new SignatureSuiteRegistry([
+  {
+    suiteClass: BbsBlsSignature2020,
+    proofType: 'BbsBlsSignature2020',
+    verificationMethodTypes: [VERIFICATION_METHOD_TYPE_BLS12381G2_KEY_2020],
+    keyTypes: [KeyType.Bls12381g2],
+  },
+  {
+    suiteClass: BbsBlsSignatureProof2020,
+    proofType: 'BbsBlsSignatureProof2020',
+    verificationMethodTypes: [VERIFICATION_METHOD_TYPE_BLS12381G2_KEY_2020],
+    keyTypes: [KeyType.Bls12381g2],
+  },
+])
+
 export const issuer = new Agent({
   config: {
     label: 'Issuer Agent',
     walletConfig: {
-      id: 'issuer-agent',
+      id: 'issuer-agent-new',
       key: 'issuer-agent-key',
     },
     endpoints: ['http://localhost:6006/didcomm'],
@@ -57,6 +83,9 @@ export const issuer = new Agent({
     logger: new ConsoleLogger(LogLevel.debug),
   },
   modules: {
+    //BBS
+    bbs: new BbsModule(),
+
     // Storage
     askar: new AskarModule({
       ariesAskar,
