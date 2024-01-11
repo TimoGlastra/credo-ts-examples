@@ -23,6 +23,7 @@ import {
   KeyDidRegistrar,
   KeyDidResolver,
   LogLevel,
+  PresentationExchangeProofFormatService,
   ProofsModule,
   V2CredentialProtocol,
   V2ProofProtocol,
@@ -93,7 +94,7 @@ export const issuer = new Agent({
     // Proofs module is enabled by default, but we can
     // override the default configuration
     proofs: new ProofsModule({
-      autoAcceptProofs: AutoAcceptProof.ContentApproved,
+      autoAcceptProofs: AutoAcceptProof.Always,
 
       // Support v1 and v2 protocol, but only with indy proof format
       proofProtocols: [
@@ -103,7 +104,11 @@ export const issuer = new Agent({
           indyProofFormat,
         }),
         new V2ProofProtocol({
-          proofFormats: [indyProofFormat, new AnonCredsProofFormatService()],
+          proofFormats: [
+            indyProofFormat,
+            new AnonCredsProofFormatService(),
+            new PresentationExchangeProofFormatService(),
+          ],
         }),
       ],
     }),
