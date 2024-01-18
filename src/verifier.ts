@@ -48,14 +48,14 @@ import { PolygonDidRegistrar, PolygonDidResolver, PolygonModule } from 'afj-poly
 const indyProofFormat = new LegacyIndyProofFormatService()
 const indyCredentialFormat = new LegacyIndyCredentialFormatService()
 
-export const issuer = new Agent({
+export const verifier = new Agent({
   config: {
-    label: 'Issuer Agent',
+    label: 'verifier Agent',
     walletConfig: {
-      id: 'issuer-agent',
-      key: 'issuer-agent-key',
+      id: 'verifier-agent',
+      key: 'verifier-agent-key',
     },
-    endpoints: ['http://localhost:6006/didcomm'],
+    endpoints: ['http://localhost:6005/didcomm'],
     // Change to view logs in terminal
     logger: new ConsoleLogger(LogLevel.debug),
   },
@@ -172,10 +172,10 @@ export const issuer = new Agent({
   dependencies: agentDependencies,
 })
 
-issuer.registerInboundTransport(
+verifier.registerInboundTransport(
   new HttpInboundTransport({
-    port: 6006,
+    port: 6005,
     path: '/didcomm',
   })
 )
-issuer.registerOutboundTransport(new HttpOutboundTransport())
+verifier.registerOutboundTransport(new HttpOutboundTransport())

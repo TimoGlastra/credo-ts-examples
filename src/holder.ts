@@ -25,6 +25,7 @@ import {
   LogLevel,
   PresentationExchangeProofFormatService,
   ProofsModule,
+  TypedArrayEncoder,
   V2CredentialProtocol,
   V2ProofProtocol,
   W3cCredentialsModule,
@@ -40,6 +41,7 @@ import {
 import { indyVdr } from '@hyperledger/indy-vdr-nodejs'
 import { anoncreds } from '@hyperledger/anoncreds-nodejs'
 import { ariesAskar } from '@hyperledger/aries-askar-nodejs'
+import { PolygonDidRegistrar, PolygonDidResolver, PolygonModule } from 'afj-polygon-w3c-module'
 
 // provides legacy (non-ledger-agnostic) indy anoncreds for
 // v1/v2 proof/credential protocol
@@ -113,13 +115,24 @@ export const holder = new Agent({
       ],
     }),
 
+    // Polygon Module
+    polygon: new PolygonModule({
+      rpcUrl: 'https://rpc-mumbai.maticvigil.com/',
+      didContractAddress: '0x12513116875BB3E4F098Ce74624739Ee51bAf023',
+      privateKey: TypedArrayEncoder.fromHex('7229440234c231c8dc067ef2425bc694f202514779a02876c1d273b00adf66fb'),
+      fileServerToken:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJBeWFuV29ya3MiLCJpZCI6IjdmYjRmN2I3LWQ5ZWUtNDYxOC04OTE4LWZiMmIzYzY1M2EyYiJ9.x-kHeTVqX4w19ibSAspCYgIL-JFVss8yZ0CT21QVRYM',
+      schemaManagerContractAddress: '0x67e8223D80aEcb337FE8D90dD41845A0DA31B4b0',
+      serverUrl: 'https://51e1-103-97-166-226.ngrok-free.app',
+    }),
+
     // Dids
-    // dids: new DidsModule({
-    //   // Support creation of did:indy, did:key dids
-    //   registrars: [new KeyDidRegistrar()],
-    //   // Support resolving of did:indy, did:sov, did:key and did:web dids
-    //   resolvers: [new KeyDidResolver()],
-    // }),
+    dids: new DidsModule({
+      // Support creation of did:indy, did:key dids
+      registrars: [new PolygonDidRegistrar()],
+      // Support resolving of did:indy, did:sov, did:key and did:web dids
+      resolvers: [new PolygonDidResolver()],
+    }),
 
     // AnonCreds
     anoncreds: new AnonCredsModule({

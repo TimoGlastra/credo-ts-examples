@@ -1,6 +1,7 @@
-import console from 'console'
 import { issuer } from './issuer'
 import { holder } from './holder'
+import { verifier } from './verifier'
+
 import {
   DidDocument,
   DidDocumentBuilder,
@@ -8,24 +9,44 @@ import {
   KeyType,
   OutOfBandState,
   TypedArrayEncoder,
+  getBls12381G2Key2020,
   getEd25519VerificationKey2018,
 } from '@aries-framework/core'
+import { PolygonDID } from '@ayanworks/polygon-did-registrar'
 
 async function app() {
-  await issuer.initialize()
+  // await issuer.initialize()
   await holder.initialize()
-  issuer.config.logger.info('Agents initialized!')
+  await verifier.initialize()
+  // issuer.config.logger.info('Agents initialized!')
+  verifier.config.logger.info('Agents initialized!')
 
-  const domain = 'sairanjit.github.io'
-  const did = `did:web:${domain}`
-  const keyId = `${did}#key-1`
+  // const credentials = await holder.w3cCredentials.getAllCredentialRecords()
 
-  // const key = await issuer.wallet.createKey({
-  //   keyType: KeyType.Ed25519,
-  //   privateKey: TypedArrayEncoder.fromString('afjdemoverysercure00000000000000'),
+  // console.log('credentials', JSON.stringify(credentials))
+
+  // const keypair = await PolygonDID.createKeyPair('testnet')
+  // console.log('keypair', keypair)
+
+  // const value = await issuer.wallet.createKey({
+  //   keyType: KeyType.K256,
+  //   seed: TypedArrayEncoder.fromString('afjdemoverysercure00000000000key'),
   // })
 
-  // const holderKey = await holder.dids.create({
+  // const issuerDid = await issuer.dids.create({
+  //   method: 'polygon',
+  //   options: {
+  //     keyType: KeyType.K256,
+  //     network: 'testnet',
+  //   },
+  //   secret: {
+  //     privateKey: TypedArrayEncoder.fromString('afjdemoverysercure00000000issuer'),
+  //   },
+  // })
+
+  // console.log('value', issuerDid)
+
+  // const holderDid = await holder.dids.create({
   //   method: 'key',
   //   options: {
   //     keyType: KeyType.Ed25519,
@@ -35,51 +56,46 @@ async function app() {
   //   },
   // })
 
-  // const didDocument = new DidDocumentBuilder(did)
-  //   .addContext('https://w3id.org/security/suites/ed25519-2018/v1')
-  //   .addVerificationMethod(getEd25519VerificationKey2018({ key, id: keyId, controller: did }))
-  //   .addAuthentication(keyId)
-  //   .build()
+  // Polygon did
+  // const issuerDid = 'did:polygon:testnet:0x26C2809EC8385bB15eb66586582e3D4626ee63C7'
 
   // await issuer.dids.import({
-  //   did,
-  //   overwrite: true,
-  //   didDocument,
-  // })
-
-  // const issuerId = `did:web:sairanjitaw.github.io`
-  // const privateKey = '73f80dcde8be30e538ea8bafeb4701d098c5ea72720a51dc750527f4b78f01b2'
-  // await issuer.dids.import({
-  //   did: issuerId,
+  //   did: issuerDid,
   //   overwrite: true,
   //   privateKeys: [
   //     {
-  //       keyType: KeyType.Ed25519,
-  //       privateKey: TypedArrayEncoder.fromHex(privateKey),
+  //       keyType: KeyType.K256,
+  //       privateKey: TypedArrayEncoder.fromHex('7229440234c231c8dc067ef2425bc694f202514779a02876c1d273b00adf66fb'),
   //     },
   //   ],
   // })
 
-  const dids = await issuer.dids.getCreatedDids({ did })
-  console.log('dids', JSON.stringify(dids))
+  // Polygon did
 
   // Create out of band invitation
 
   const inv = await holder.oob.createLegacyInvitation({
     autoAcceptConnection: true,
   })
-  const { connectionRecord } = await issuer.oob.receiveInvitation(inv.invitation)
+  // const { connectionRecord } = await issuer.oob.receiveInvitation(inv.invitation)
+  // if (!connectionRecord) {
+  //   throw new Error('Connection not found')
+  // }
+
+  // await issuer.connections.returnWhenIsConnected(connectionRecord.id)
+
+  const { connectionRecord } = await verifier.oob.receiveInvitation(inv.invitation)
   if (!connectionRecord) {
     throw new Error('Connection not found')
   }
 
-  await issuer.connections.returnWhenIsConnected(connectionRecord.id)
+  await verifier.connections.returnWhenIsConnected(connectionRecord.id)
 
-  const usingDid = dids.find((record) => record.did.includes('did:web'))?.did
+  // const usingDid = dids.find((record) => record.did.includes('did:web'))?.did
 
-  console.log('\n\n\nusingDid***', usingDid)
+  // console.log('\n\n\nusingDid***', usingDid)
 
-  console.log('connectionRecord.did', connectionRecord.did)
+  // console.log('connectionRecord.did', connectionRecord.did)
 
   // const credRecord = await issuer.credentials.offerCredential({
   //   connectionId: connectionRecord.id,
@@ -88,10 +104,10 @@ async function app() {
   //       credential: {
   //         '@context': ['https://www.w3.org/2018/credentials/v1', 'https://www.w3.org/2018/credentials/examples/v1'],
   //         type: ['VerifiableCredential', 'UniversityDegreeCredential'],
-  //         issuer: { id: usingDid! },
+  //         issuer: { id: issuerDid },
   //         issuanceDate: new Date().toISOString(),
   //         credentialSubject: {
-  //           id: holderKey.didState.did!,
+  //           id: holderDid.didState.did!,
   //           degree: {
   //             type: 'BachelorDegree',
   //             name: 'Bachelor of Science and Arts',
@@ -99,7 +115,7 @@ async function app() {
   //         },
   //       },
   //       options: {
-  //         proofType: 'Ed25519Signature2018',
+  //         proofType: 'EcdsaSecp256k1Signature2019',
   //         proofPurpose: 'assertionMethod',
   //       },
   //     },
@@ -107,7 +123,7 @@ async function app() {
   //   protocolVersion: 'v2',
   // })
 
-  const proofRecord = await issuer.proofs.requestProof({
+  const proofRecord = await verifier.proofs.requestProof({
     connectionId: connectionRecord.id,
     proofFormats: {
       presentationExchange: {
@@ -118,7 +134,7 @@ async function app() {
               constraints: {
                 fields: [
                   {
-                    path: ['$.credentialSubject.degree.type'],
+                    path: ['$.credentialSubject.degree.typ'],
                   },
                 ],
               },
@@ -126,6 +142,11 @@ async function app() {
               schema: [{ uri: 'https://www.w3.org/2018/credentials/examples/v1' }],
             },
           ],
+          // format: {
+          //   ldp_vc: {
+          //     proof_type: ['EcdsaSecp256k1Signature2019'],
+          //   },
+          // },
         },
       },
     },
