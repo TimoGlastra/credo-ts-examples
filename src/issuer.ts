@@ -109,12 +109,12 @@ export const issuer = new Agent({
     }),
 
     // Dids
-    // dids: new DidsModule({
-    //   // Support creation of did:indy, did:key dids
-    //   // registrars: [new KeyDidRegistrar()],
-    //   // Support resolving of did:indy, did:sov, did:key and did:web dids
-    //   resolvers: [new WebDidResolver()],
-    // }),
+    dids: new DidsModule({
+      // Support creation of did:indy, did:key dids
+      registrars: [new IndyVdrIndyDidRegistrar()],
+      // Support resolving of did:indy, did:sov, did:key and did:web dids
+      resolvers: [new IndyVdrIndyDidResolver()],
+    }),
 
     // AnonCreds
     anoncreds: new AnonCredsModule({

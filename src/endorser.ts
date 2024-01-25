@@ -45,16 +45,16 @@ import { ariesAskar } from '@hyperledger/aries-askar-nodejs'
 const indyProofFormat = new LegacyIndyProofFormatService()
 const indyCredentialFormat = new LegacyIndyCredentialFormatService()
 
-export const holder = new Agent({
+export const endorser = new Agent({
   config: {
-    label: 'Holder Agent',
+    label: 'endorser Agent',
     walletConfig: {
-      id: 'holder-agent',
-      key: 'holder-agent-key',
+      id: 'endorser-agent',
+      key: 'endorser-agent-key',
     },
+    endpoints: ['http://localhost:7006/didcomm'],
     // Change to view logs in terminal
     logger: new ConsoleLogger(LogLevel.debug),
-    endpoints: ['http://localhost:6007/didcomm'],
   },
   modules: {
     // Storage
@@ -109,12 +109,12 @@ export const holder = new Agent({
     }),
 
     // Dids
-    // dids: new DidsModule({
-    //   // Support creation of did:indy, did:key dids
-    //   registrars: [new KeyDidRegistrar()],
-    //   // Support resolving of did:indy, did:sov, did:key and did:web dids
-    //   resolvers: [new KeyDidResolver()],
-    // }),
+    dids: new DidsModule({
+      // Support creation of did:indy, did:key dids
+      registrars: [new IndyVdrIndyDidRegistrar()],
+      // Support resolving of did:indy, did:sov, did:key and did:web dids
+      resolvers: [new IndyVdrIndyDidResolver()],
+    }),
 
     // AnonCreds
     anoncreds: new AnonCredsModule({
@@ -154,10 +154,10 @@ export const holder = new Agent({
   dependencies: agentDependencies,
 })
 
-holder.registerInboundTransport(
+endorser.registerInboundTransport(
   new HttpInboundTransport({
-    port: 6007,
+    port: 7006,
     path: '/didcomm',
   })
 )
-holder.registerOutboundTransport(new HttpOutboundTransport())
+endorser.registerOutboundTransport(new HttpOutboundTransport())
