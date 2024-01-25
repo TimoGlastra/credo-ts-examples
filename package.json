@@ -8,6 +8,15 @@
   "license": "ISC",
   "scripts": {
     "start": "tsx src/app.ts",
+    "generate-key-pair": "tsx src/steps/create-key-pair.ts",
+    "create-multiple-dids": "tsx src/steps/create-multiple-dids.ts",
+    "resolve-did-0": "tsx src/steps/resolve-did.ts",
+    "issue-credential-1": "tsx src/steps/issue-credential.ts",
+    "get-credential-records-2": "tsx src/steps/get-all-credential-records.ts",
+    "send-proof-3": "tsx src/steps/request-proof.ts",
+    "get-proof-records-4": "tsx src/steps/get-all-verification-records.ts",
+    "resolve-schema-5": "tsx src/steps/resolve-schema-by-id.ts",
+    "create-schema-6": "tsx src/steps/create-schema.ts",
     "postinstall": "patch-package"
   },
   "dependencies": {
@@ -20,7 +29,7 @@
     "@hyperledger/anoncreds-nodejs": "0.1.0",
     "@hyperledger/aries-askar-nodejs": "0.1.0",
     "@hyperledger/indy-vdr-nodejs": "0.1.0",
-    "afj-polygon-w3c-module": "./afj-polygon-w3c-module-v1.0.1.tgz",
+    "afj-polygon-w3c-module": "./afj-polygon-w3c-module-v1.0.3.tgz",
     "express": "^4.18.2",
     "ngrok": "^4.3.3",
     "qrcode": "^1.5.1",

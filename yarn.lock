@@ -103,10 +103,10 @@
   dependencies:
     static-eval "2.0.2"
 
-"@ayanworks/polygon-did-registrar@0.0.16-alpha.5":
-  version "0.0.16-alpha.5"
-  resolved "https://registry.yarnpkg.com/@ayanworks/polygon-did-registrar/-/polygon-did-registrar-0.0.16-alpha.5.tgz#6c683558eaee2eb42fb136e42d348316613cb71b"
-  integrity sha512-Z3+sBuuivHcuUE3dmT/7zWvoyKFymHzlwQtmhDSKBGHWBxj9gbd681q7m+ph5klHTw9OJH1rZvUTXNtnVtEO1A==
+"@ayanworks/polygon-did-registrar@0.0.16-alpha.6":
+  version "0.0.16-alpha.6"
+  resolved "https://registry.yarnpkg.com/@ayanworks/polygon-did-registrar/-/polygon-did-registrar-0.0.16-alpha.6.tgz#3da40d7e82f367c171781f3b36762d3fd324d526"
+  integrity sha512-dfAFYI+qM5m77VEVxNvvnOL9W11xBVGdzVacNpYPQiVaWTj1XtX+2BCFsVKu8GRWM9NgcUUOZBzErMp32wAgdg==
   dependencies:
     "@ayanworks/polygon-did-registry-contract" "2.0.1-alpha.3"
     "@ethersproject/basex" "^5.7.0"
@@ -1142,17 +1142,21 @@ aes-js@4.0.0-beta.5:
   resolved "https://registry.yarnpkg.com/aes-js/-/aes-js-4.0.0-beta.5.tgz#8d2452c52adedebc3a3e28465d858c11ca315873"
   integrity sha512-G965FqalsNyrPqgEGON7nIx1e/OVENSgiEIzyC63haUMuvNnwIgIjMs52hlTCKhkBny7A2ORNlfY9Zu+jmGk1Q==
 
-"afj-polygon-w3c-module@file:afj-polygon-w3c-module-v1.0.1.tgz":
-  version "1.0.1"
-  resolved "file:afj-polygon-w3c-module-v1.0.1.tgz#b4b388f2dd61c32ea0ceb195a3348513ff776af9"
+afj-polygon-w3c-module@./afj-polygon-w3c-module-v1.0.3.tgz:
+  version "1.0.3"
+  resolved "./afj-polygon-w3c-module-v1.0.3.tgz#a12575726f7d44ef413ed6cb7edd31a23d0ef60d"
   dependencies:
     "@aries-framework/askar" "0.4.2"
     "@aries-framework/core" "0.4.2"
-    "@ayanworks/polygon-did-registrar" "0.0.16-alpha.5"
+    "@ayanworks/polygon-did-registrar" "0.0.16-alpha.6"
     "@ayanworks/polygon-did-resolver" "0.0.16-alpha.8"
     "@ayanworks/polygon-schema-manager" "0.0.2-alpha.1"
+    "@sphereon/pex" "^2.2.2"
+    "@sphereon/pex-models" "^2.1.2"
+    "@sphereon/ssi-types" "^0.17.5"
     did-resolver "^4.1.0"
     ethers "^6.9.0"
+    jsonpath "^1.1.1"
 
 agent-base@6:
   version "6.0.2"
